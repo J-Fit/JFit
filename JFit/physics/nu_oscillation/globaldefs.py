@@ -118,7 +118,8 @@ Charged-current matter potential in the Earth's crust.
 Units: [eV]
 """
 
-S12_NO_BF = sqrt(0.310)
+# S12_NO_BF = sqrt(0.310)
+S12_NO_BF = sqrt(0.307)
 r"""float: Module-level constant
 
 Lepton mixing angle sin(theta_12), best fit from NuFit 4.0, assuming
@@ -134,7 +135,8 @@ normal ordering with SK atmospheric data.
 Units: [Adimensional]
 """
 
-S13_NO_BF = sqrt(2.240e-2)
+# S13_NO_BF = sqrt(2.240e-2)
+S13_NO_BF = sqrt(2.18e-2)
 r"""float: Module-level constant
 
 Lepton mixing angle sin(theta_13), best fit from NuFit 4.0, assuming
@@ -150,7 +152,8 @@ normal ordering with SK atmospheric data.
 Units: [radian]
 """
 
-D21_NO_BF = 7.39e-5
+# D21_NO_BF = 7.39e-5
+D21_NO_BF = 7.53e-5
 r"""float: Module-level constant
 
 Mass-squared difference Delta m^2_21, best fit from NuFit 4.0, assuming
@@ -158,7 +161,8 @@ normal ordering with SK atmospheric data.
 Units: [eV^2]
 """
 
-D31_NO_BF = 2.525e-3
+# D31_NO_BF = 2.525e-3
+D31_NO_BF = 2.5283e-3
 r"""float: Module-level constant
 
 Mass-squared difference Delta m^2_31, best fit from NuFit 4.0, assuming

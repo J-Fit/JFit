@@ -1,0 +1,14 @@
+PDG2020:
+  normal:
+    sinsq12 : 0.307
+    dmsq21 : 7.53e-5
+    dmsq31 : 0.0025283
+    dmsq32 : 2.453e-3
+    sinsq13 : 0.0218
+  invert:    
+    sinsq12 : 0.307
+    dmsq21 : 7.53e-5
+    dmsq31 : -0.0024707
+    dmsq32 : -2.546e-3
+    sinsq13 : 0.0218
+MatterDensity : 2450.0
