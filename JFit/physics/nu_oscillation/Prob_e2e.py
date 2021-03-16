@@ -127,8 +127,8 @@ class Prob_e2e:
         Sinsq2Theta12 = (4 * self.Sin_sqTheta12 * (1 - self.Sin_sqTheta12))
         Sinsq2Theta13 = (4 * self.Sin_sqTheta13 * (1 - self.Sin_sqTheta13))
         if ME:
-            # reverse the relation
-            A_MatPoten = -E * self.A_MatPoten_0
+            # reverse the relation, for neutrino
+            A_MatPoten = E * self.A_MatPoten_0
             Delta_c = DeltaM31_sq * (1 - Sin_sqTheta12) + DeltaM32_sq * Sin_sqTheta12  # eq. 8
             alpha_c = DeltaM21_sq / Delta_c  # eq .8
             A_star = A_MatPoten * (1 - Sin_sqTheta13) / DeltaM21_sq  # eq .9
@@ -137,18 +137,18 @@ class Prob_e2e:
             Cos_2Theta_13 = 1 - 2 * Sin_sqTheta13
             # C_hat_12 = np.sqrt(1 - 2.0 * A_star * Cos_2Theta_12 +A_star * A_star)
             # C_hat_13 = np.sqrt(1 - 2.0 * A_c * Cos_2Theta_13 +A_c * A_c)
-            C_hat_12_prime = np.sqrt(1 + 2.0 * A_star * Cos_2Theta_12 +A_star * A_star)
-            C_hat_13_prime = np.sqrt(1 + 2.0 * A_c * Cos_2Theta_13 + A_c * A_c)
+            C_hat_12_prime = np.sqrt(1 - 2.0 * A_star * Cos_2Theta_12 +A_star * A_star)
+            C_hat_13_prime = np.sqrt(1 - 2.0 * A_c * Cos_2Theta_13 + A_c * A_c)
 
-            Cos_sq_Theta12_tilde = 0.5*(1+(A_star+Cos_2Theta_12)/C_hat_12_prime)
-            Cos_sq_Theta13_tilde = 0.5*(1+(A_c+Cos_2Theta_13)/C_hat_13_prime)
+            Cos_sq_Theta12_tilde = 0.5*(1-(A_star-Cos_2Theta_12)/C_hat_12_prime)
+            Cos_sq_Theta13_tilde = 0.5*(1-(A_c-Cos_2Theta_13)/C_hat_13_prime)
             Sin_sqTheta13_M=1-Cos_sq_Theta13_tilde
             Sinsq2Theta13_M = 4*Sin_sqTheta13_M*Cos_sq_Theta13_tilde
             Sin_sqTheta12_M = 1-Cos_sq_Theta12_tilde
             Sinsq2Theta12_M=4*Sin_sqTheta12_M*Cos_sq_Theta12_tilde
 
-            DeltaM21_sq_M = Delta_c*(0.5*(1-A_c-C_hat_13_prime)+alpha_c*(C_hat_12_prime+A_star))
-            DeltaM31_sq_M = Delta_c*(0.5*(1-A_c+C_hat_13_prime)+alpha_c*0.5*(C_hat_12_prime+A_star-Cos_2Theta_12))
+            DeltaM21_sq_M = Delta_c*(0.5*(1+A_c-C_hat_13_prime)+alpha_c*(C_hat_12_prime-A_star))
+            DeltaM31_sq_M = Delta_c*(0.5*(1+A_c+C_hat_13_prime)+alpha_c*0.5*(C_hat_12_prime-A_star-Cos_2Theta_12))
         
             DeltaM32_sq_M = DeltaM31_sq_M - DeltaM21_sq_M
             Delta21 = 1.266932679815373 * DeltaM21_sq_M * BaseLine / E
@@ -221,17 +221,18 @@ class Prob_e2e:
         return prob
 
 
-def Check_YB_Hermitian(E_low=0.8, E_up=15., N=1000, BaseLine=52.5e5):
+def Check_YB_Hermitian(E_low=0.8, E_up=15., N=1000, BaseLine=52.5e5,ME=1):
     def GetAsy(a, b):
-        return 2 * (a - b) / (a + b)
+        # return 2 * (a - b) / (a + b)
+        return (a - b) / ( b)
 
     Es = np.linspace(E_low, E_up, N)
 
     # JUNO Yellow formula
-    P_e2e_YB = Prob_e2e()
-    y_YB = P_e2e_YB.get_prob_e2e_YB(Es, baseline=BaseLine)
-    y_Yufeng=P_e2e_YB.get_prob_e2e_Yufeng(Es, baseline=BaseLine)
-    y_Amir=P_e2e_YB.get_prob_e2e_Amir(Es, baseline=BaseLine)
+    P_e2e_YB = Prob_e2e(NMO=1)
+    y_YB = P_e2e_YB.get_prob_e2e_YB(Es, baseline=BaseLine,ME=ME)
+    y_Yufeng=P_e2e_YB.get_prob_e2e_Yufeng(Es, baseline=BaseLine,ME=ME)
+    y_Amir=P_e2e_YB.get_prob_e2e_Amir(Es, baseline=BaseLine,ME=ME)
     # Hermitian approach
     import sys
     sys.path.append('../..')
@@ -247,8 +248,10 @@ def Check_YB_Hermitian(E_low=0.8, E_up=15., N=1000, BaseLine=52.5e5):
     y_Het = np.zeros(N)
     for i, energy in enumerate(Es):
         # sign - for antineutrinos
-        h_matter = hamiltonians3nu.hamiltonian_3nu_matter(h_vacuum_energy_indep, energy * 1e6,-VCC_EARTH_CRUST)  
-        # h_matter = np.multiply(1/(energy*1e6),h_vacuum_energy_indep)  
+        if ME:
+            h_matter = hamiltonians3nu.hamiltonian_3nu_matter(h_vacuum_energy_indep, energy * 1e6,-VCC_EARTH_CRUST)  
+        else:
+            h_matter = np.multiply(1/(energy*1e6),h_vacuum_energy_indep)  
         Pee, Pem, Pet, Pme, Pmm, Pmt, Pte, Ptm, Ptt = oscprob3nu.probabilities_3nu(
             h_matter, BaseLine * CONV_CM_TO_INV_EV)
         y_Het[i] = Pee
@@ -265,9 +268,10 @@ def Check_YB_Hermitian(E_low=0.8, E_up=15., N=1000, BaseLine=52.5e5):
     ax.plot(Es, GetAsy(y_Amir,y_Yufeng), label='Amir/Yufeng')
     ax.legend()
     fig.savefig('./results/Yufeng_Amir.png')    
+    ax.plot(Es, GetAsy(y_YB, y_Het), label='YB/Hamiltonian')
     ax.plot(Es, GetAsy(y_YB, y_Yufeng), label='YB/Yufeng')
     ax.plot(Es, GetAsy(y_Yufeng,y_Het), label='Yufeng/Hamiltonian')
-    ax.plot(Es, GetAsy(y_Amir,y_Het), label='Amir/Hamiltonian')
+    # ax.plot(Es, GetAsy(y_Amir,y_Het), label='Amir/Hamiltonian')
 
     ax.legend()
     fig.savefig('./results/four_model.png')
