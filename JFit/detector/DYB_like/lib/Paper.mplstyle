@@ -1,4 +1,4 @@
-figure.figsize:     8, 6
+figure.figsize:     14, 8
 axes.titlesize : 24
 axes.labelsize : 28
 lines.linewidth : 2
@@ -19,5 +19,5 @@ ytick.major.size     : 12
 ytick.major.pad      : 7
 legend.fontsize      : 22
 legend.frameon       : True
-axes.formatter.limits: -4, 6 
+axes.formatter.limits: -3, 5
 font.size:    20

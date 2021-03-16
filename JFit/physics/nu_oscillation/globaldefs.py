@@ -90,7 +90,8 @@ Electron fraction in the Earth's crust.
 Units: [Adimensional]
 """
 
-DENSITY_MATTER_CRUST_G_PER_CM3 = 3.0
+# DENSITY_MATTER_CRUST_G_PER_CM3 = 3.0
+DENSITY_MATTER_CRUST_G_PER_CM3 = 2.45
 r"""float: Module-level constant
 
 Average matter density in the Earth's crust.

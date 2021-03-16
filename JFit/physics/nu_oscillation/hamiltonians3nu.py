@@ -32,7 +32,7 @@ from numpy import *
 import numpy as np
 import cmath
 import cmath as cmath
-import copy
+from copy import deepcopy
 
 import sys
 sys.path.append('../..')
@@ -286,7 +286,7 @@ def hamiltonian_3nu_matter(h_vacuum_energy_independent, energy, VCC):
         Hamiltonian 3x3 matrix.
     """
 
-    h_matter = copy.deepcopy(h_vacuum_energy_independent)
+    h_matter = deepcopy(h_vacuum_energy_independent)
     h_matter = np.multiply(1.0/energy, h_matter)
 
     # Add the matter potential to the ee term to find the matter
@@ -323,7 +323,7 @@ def hamiltonian_3nu_nsi(h_vacuum_energy_independent, energy, VCC, eps):
     list
         Hamiltonian 3x3 matrix.
     """
-    h_nsi = copy.deepcopy(h_vacuum_energy_independent)
+    h_nsi = deepcopy(h_vacuum_energy_independent)
     h_nsi = np.multiply(1.0/energy, h_nsi)
 
     eps_ee, eps_em, eps_et, eps_mm, eps_mt, eps_tt = eps
@@ -382,7 +382,7 @@ def hamiltonian_3nu_liv(h_vacuum_energy_independent, energy, sxi12, sxi23,
         Hamiltonian 3x3 matrix.
     """
 
-    h_liv = copy.deepcopy(h_vacuum_energy_independent)
+    h_liv = deepcopy(h_vacuum_energy_independent)
     h_liv = np.multiply(1.0/energy, h_liv)
 
     f = energy/Lambda
