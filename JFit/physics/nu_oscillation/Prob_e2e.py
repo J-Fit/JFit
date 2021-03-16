@@ -221,7 +221,7 @@ class Prob_e2e:
         return prob
 
 
-def Check_YB_Hermitian(E_low=0.1, E_up=15., N=1000, BaseLine=52.5e5):
+def Check_YB_Hermitian(E_low=0.8, E_up=15., N=1000, BaseLine=52.5e5):
     def GetAsy(a, b):
         return 2 * (a - b) / (a + b)
 
