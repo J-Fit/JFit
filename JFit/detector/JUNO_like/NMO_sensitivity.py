@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+'''
+author: Jinnan Zhang
+date: 2021.03.20
+'''
 import sys
 sys.path.append('../..')
-from physics.nu_oscillation.globaldefs import *
 import physics.nu_oscillation.oscprob3nu as oscprob3nu
 import physics.nu_oscillation.hamiltonians3nu as hamiltonians3nu
 import numpy as np

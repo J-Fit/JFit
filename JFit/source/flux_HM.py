@@ -5,7 +5,8 @@ import ROOT
 import sys
 import os
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-file_input = ROOT.TFile(base_dir + "/source/data/JUNOInputs2021_03_05.root")
+# file_input = ROOT.TFile(base_dir + "/source/data/JUNOInputs2021_03_05.root")
+file_input = ROOT.TFile(base_dir + "/source/data/JUNOInputs2021_03_22.root")
 h_flux = file_input.Get("HuberMuellerFlux_DYBbumpFixed")
 h_xsec = file_input.Get("IBDXsec_VogelBeacom_DYB")
 x_flux = np.asarray(

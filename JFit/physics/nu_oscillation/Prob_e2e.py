@@ -6,6 +6,26 @@ date: 2021.03.08
 '''
 import numpy as np
 
+def get_parser():
+    import argparse
+    parser = argparse.ArgumentParser(description="Check or show the oscillation pattern.")
+    parser.add_argument(
+        "--cME",
+        action="store_true",
+        help="Check the matter effect model, the JUNO Yellow book model, the Yufeng model, and the Hiroshi model."
+    )
+    parser.set_defaults(cME=False)
+    
+    parser.add_argument("--pNMO",
+                        action="store_true",
+                        help="Show pattern of neutrino mass ordering.")
+    parser.set_defaults(pNMO=False)
+    parser.add_argument(
+        "--NMO-op",
+        type=str,
+        help="The NMO show option.")
+
+    return parser
 
 class Prob_e2e:
     def __init__(self, NMO=1, ME=True, NameSpace='PDG2020'):
@@ -256,28 +276,41 @@ def Check_YB_Hermitian(E_low=0.8, E_up=15., N=1000, BaseLine=52.5e5,ME=1):
             h_matter, BaseLine * CONV_CM_TO_INV_EV)
         y_Het[i] = Pee
     import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_pdf import PdfPages
     plt.style.use('../../detector/DYB_like/lib/Paper.mplstyle')
-    fig, ax = plt.subplots()
-    ax.set_ylabel(r'$\frac{2\cdot(A-B)}{(A+B)}$')
-    ax.set_xlabel('Neutrino Energy [MeV]')
-    # ax.plot(Es, y_Het, label='Hamiltonian approach')
-    # ax.plot(Es, y_YB, label='Yellow Book Approach')
-    # ax.plot(Es, y_Yufeng, label='Yufeng Approach')
-    # ax.plot(Es, y_Amir, label='Amir Approach')
-    # ax.plot(Es, GetAsy(y_YB, y_Het), label='YB/Hamiltonian')
-    ax.plot(Es, GetAsy(y_Amir,y_Yufeng), label='Amir/Yufeng')
-    ax.legend()
-    fig.savefig('./results/Yufeng_Amir.png')    
-    ax.plot(Es, GetAsy(y_YB, y_Het), label='YB/Hamiltonian')
-    ax.plot(Es, GetAsy(y_YB, y_Yufeng), label='YB/Yufeng')
-    ax.plot(Es, GetAsy(y_Yufeng,y_Het), label='Yufeng/Hamiltonian')
-    # ax.plot(Es, GetAsy(y_Amir,y_Het), label='Amir/Hamiltonian')
-
-    ax.legend()
-    fig.savefig('./results/four_model.png')
-    plt.show()
+    with PdfPages('results/ME_models.pdf') as pdf:
+        fig, ax = plt.subplots()
+        ax.set_ylabel(r'$\frac{2\cdot(A-B)}{(A+B)}$')
+        ax.set_xlabel('Neutrino Energy [MeV]')
+        # ax.plot(Es, y_Het, label='Hamiltonian approach')
+        # ax.plot(Es, y_YB, label='Yellow Book Approach')
+        # ax.plot(Es, y_Yufeng, label='Yufeng Approach')
+        # ax.plot(Es, y_Amir, label='Amir Approach')
+        # ax.plot(Es, GetAsy(y_YB, y_Het), label='YB/Hamiltonian')
+        # ax.plot(Es, GetAsy(y_Amir,y_Yufeng), label='Amir/Yufeng')
+        ax.plot(Es, GetAsy(y_Amir,y_Yufeng), label='Amir/Yufeng')
+        ax.text(y=0.,x=6,s="Amir: arXiv:1910.12900\n Yufeng: JUNO-doc-6859")
+        ax.legend()
+        pdf.savefig()
+        # ax.cla()
+        # fig.savefig('./results/Yufeng_Amir.png')    
+        ax.plot(Es, GetAsy(y_YB, y_Het), label='YB/Hamiltonian')
+        ax.plot(Es, GetAsy(y_YB, y_Yufeng), label='YB/Yufeng')
+        ax.plot(Es, GetAsy(y_Yufeng,y_Het), label='Yufeng/Hamiltonian')
+        # ax.plot(Es, GetAsy(y_Amir,y_Het), label='Amir/Hamiltonian')
+        ax.set_ylabel(r'$\frac{2\cdot(A-B)}{(A+B)}$')
+        ax.set_xlabel('Neutrino Energy [MeV]')
+        ax.legend()
+        pdf.savefig()
+        # fig.savefig('./results/four_model.png')
+        # plt.show()
     
-
+def show_NMO_pattern(pattern='nue2nue'):
+    print(pattern)
 if __name__ == "__main__":
-    Check_YB_Hermitian()
-    # pass
+    parser = get_parser()
+    args = parser.parse_args()
+    if args.cME:
+        Check_YB_Hermitian()
+    if args.pNMO:
+        show_NMO_pattern(args.NMO_op)
