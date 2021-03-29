@@ -1,4 +1,4 @@
-figure.figsize:     16, 8
+figure.figsize:     10, 7
 axes.titlesize : 22
 axes.labelsize : 22
 lines.linewidth : 2

@@ -7,65 +7,133 @@ import sys
 sys.path.append('../..')
 import physics.nu_oscillation.oscprob3nu as oscprob3nu
 import physics.nu_oscillation.hamiltonians3nu as hamiltonians3nu
+import physics.nu_oscillation.nucraft_trunk.NuCraft as NuCraft
+import source.flux_Honda as flux_Honda
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-def reactor_average_energy(E_low=1.81, E_up=12, N=1000):
-    from source.flux_HM import flux_HM, xsec_VB_DYB
-    N_proton = 1e33
-    Es = np.linspace(E_low, E_up, N)
-    E_av = 0.0
-    E_all = 0.0
-    for E in Es:
-        E_av += (E * flux_HM(E) * xsec_VB_DYB(E) * N_proton)
-        E_all += (flux_HM(E) * xsec_VB_DYB(E) * N_proton)
+def ShowAtmOsciPattern(Eup=1):
+    my_flux = flux_Honda.flux_Honda()
 
-    E_av /= E_all
-    print('Average Energy: %e' % (E_av))  # 4.254 MeV
+    from numpy import arccos, arcsin, sqrt, rollaxis, ones_like, linspace, pi, meshgrid, array
+    # number of energy bins
+    eBins = 2
+    zBins = 100
+    # zenith angles for the four plots
+    # zList = arccos([-1., -0.8, -0.4, -0.1])
+    zList = arccos(linspace(-1, 0, zBins))
+    # energy range in GeV
+    eList = linspace(0.5, Eup, eBins)
 
-    # import matplotlib.pyplot as plt
-    # plt.plot(Es, flux_HM(Es)*xsec_VB_DYB(Es)*N_proton)
+    # parameters from arxiv 1205.7071
+    theta23 = arcsin(sqrt(0.545)) / pi * 180.
+    theta13 = arcsin(sqrt(0.0218)) / pi * 180.
+    theta12 = arcsin(sqrt(0.307)) / pi * 180.
+    DM21 = 7.53e-5
+    DM31 = 2.453e-3 + DM21
+    DM31_IO = -2.546e-3 + DM21
+
+    # Akhemdov is implicitely assuming an electron-to-neutron ratio of 0.5;
+    # he is also using the approximation DM31 = DM32;
+    # if you want to reproduce his numbers exactly, switch the lines below, and turn
+    # atmosphereMode to 0 (no handling of the atmosphere because of )
+    AkhmedovOsci = NuCraft.NuCraft(
+        (1., DM21, DM31 - DM21), [(1, 2, theta12), (1, 3, theta13, 0),
+                                  (2, 3, theta23)],
+        earthModel=NuCraft.EarthModel("prem", y=(0.5, 0.5, 0.5)),
+        detectorDepth=0.7,
+        atmHeight=0.)
+    AkhmedovOsci_IO = NuCraft.NuCraft(
+        (1., DM21, DM31_IO - DM21), [(1, 2, theta12), (1, 3, theta13, 0),
+                                     (2, 3, theta23)],
+        earthModel=NuCraft.EarthModel("prem", y=(0.5, 0.5, 0.5)),
+        detectorDepth=0.7,
+        atmHeight=0.)
+    atmosphereMode = 3  # default: efficiently calculate eight path lenghts per neutrino and take the average
+    numPrec = 5e-4
+    # 12, -12:  NuE, NuEBar
+    # 14, -14:  NuMu, NuMuBar
+    # 16, -16:  NuTau, NuTauBar
+    pType = 14
+
+    zListLong, eListLong = meshgrid(zList, eList)
+    zListLong = zListLong.flatten()
+    eListLong = eListLong.flatten()
+    tListLong = ones_like(eListLong) * pType
+    prob = AkhmedovOsci.CalcWeights((tListLong, eListLong, zListLong),
+                                    numPrec=numPrec,
+                                    atmMode=atmosphereMode)
+    prob_IO = AkhmedovOsci_IO.CalcWeights((tListLong, eListLong, zListLong),
+                                          numPrec=numPrec,
+                                          atmMode=atmosphereMode)
+    probe = AkhmedovOsci.CalcWeights(
+        (tListLong / pType * 12, eListLong, zListLong),
+        numPrec=numPrec,
+        atmMode=atmosphereMode)
+    probe_IO = AkhmedovOsci_IO.CalcWeights(
+        (tListLong / pType * 12, eListLong, zListLong),
+        numPrec=numPrec,
+        atmMode=atmosphereMode)
+    prob = rollaxis(array(prob).reshape(len(eList), len(zList), -1), 0, 3)
+    prob_IO = rollaxis(
+        array(prob_IO).reshape(len(eList), len(zList), -1), 0, 3)
+
+    probe = rollaxis(array(probe).reshape(len(eList), len(zList), -1), 0, 3)
+    probe_IO = rollaxis(
+        array(probe_IO).reshape(len(eList), len(zList), -1), 0, 3)
+
+    # numu
+    fig, ax1G = plt.subplots()
+    i_e = 1
+    ax1G.set_title(r"$\frac{N_{\nu_\mu}}{N_{\nu_\mu}^0}$ @ %.1f GeV" %
+                   (eList[i_e]))
+    ax1G.set_xlabel(r"Zenith angle [degree]")
+
+    pmu2mu = prob[:, 1, i_e]
+    pmu2mu_IO = prob_IO[:, 1, i_e]
+    Ne2Nmu = my_flux.get_flavor_ratio(eList[i_e], flavor_a=12, flavor_b=14)
+    pe2mu = probe[:, 1, i_e]
+    pe2mu_IO = probe_IO[:, 1, i_e]
+
+    survival_mu2mu = pmu2mu + Ne2Nmu * pe2mu
+    survival_mu2mu_IO = pmu2mu_IO + Ne2Nmu * pe2mu_IO
+
+    ax1G.plot(zList / pi * 180, survival_mu2mu, label='NO')
+    ax1G.plot(zList / pi * 180, survival_mu2mu_IO, label='IO')
+    ax1G.legend()
     # plt.show()
-    return E_av
+    fig.savefig('./pics/Nu2NuAngle_%.1fGeV.png' % (eList[i_e]))
 
+    # nue
+    fig, ax1G = plt.subplots()
+    i_e = 1
+    ax1G.set_title(r"$\frac{N_{\nu_e}}{N_{\nu_e}^0}$ @ %.1f GeV" %
+                   (eList[i_e]))
+    ax1G.set_xlabel(r"Zenith angle [degree]")
 
-def prob_baseline(baseline_low=0, baseline_up=10, N_b=400, E_av=4.253804):
-    energy = E_av * 1e6
-    h_vacuum_energy_indep = hamiltonians3nu.hamiltonian_3nu_vacuum_energy_independent( \
-                                                                                S12_NO_BF, S23_NO_BF,
-                                                                                S13_NO_BF, DCP_NO_BF,
-                                                                                D21_NO_BF, D31_NO_BF)
-    h_vacuum = np.multiply(1. / energy, h_vacuum_energy_indep)
+    pmu2e = prob[:, 0, i_e]
+    pmu2e_IO = prob_IO[:, 0, i_e]
+    Nmu2Ne = my_flux.get_flavor_ratio(eList[i_e], flavor_a=14, flavor_b=12)
+    pe2e = probe[:, 0, i_e]
+    pe2e_IO = probe_IO[:, 0, i_e]
 
-    baselines = np.linspace(baseline_low, baseline_up, N_b)
-    # Each element of prob: [Pee, Pem, Pet, Pme, Pmm, Pmt, Pte, Ptm, Ptt]
-    prob = np.asarray([
-        oscprob3nu.probabilities_3nu(h_vacuum, CONV_KM_TO_INV_EV * l)
-        for l in baselines
-    ])
-    prob_ee = prob[:, 0]
-    fig, ax = plt.subplots()
-    ax.plot(baselines, prob_ee, label=r'$P_{\nu_e\to\nu_e}$')
-    ax.set_xlabel('Baseline [km]')
-    # ax.set_ylabel('')
-    ax.legend()
-    plt.show()
+    survival_e2e = pe2e + Nmu2Ne * pmu2e
+    survival_e2e_IO = pe2e_IO + Nmu2Ne * pmu2e_IO
 
-
-def prob_baseline_nd_Enu(baselines=(0, 10), Enu=(1.807, 10), N_grid=100):
-    h_vacuum_energy_indep = hamiltonians3nu.hamiltonian_3nu_vacuum_energy_independent( \
-                                                                                S12_NO_BF, S23_NO_BF,
-                                                                                S13_NO_BF, DCP_NO_BF,
-                                                                                D21_NO_BF, D31_NO_BF)
-
-    return 0
+    ax1G.plot(zList / pi * 180, survival_e2e, label='NO')
+    ax1G.plot(zList / pi * 180, survival_e2e_IO, label='IO')
+    ax1G.legend()
+    # plt.show()
+    fig.savefig('./pics/Nu2eAngle_%.1fGeV.png' % (eList[i_e]))
 
 
 if __name__ == "__main__":
     # reactor_average_energy()
     plt.style.use('lib/Paper.mplstyle')
-    prob_baseline()
+    import sys
+    ShowAtmOsciPattern(float(sys.argv[1]))
+
     # from physics.nu_oscillation.Prob_e2e import Prob_e2e
     # a= Prob_e2e()
     # a.out()
