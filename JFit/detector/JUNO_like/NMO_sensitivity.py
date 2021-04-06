@@ -13,6 +13,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def get_parser():
+    import argparse
+    parser = argparse.ArgumentParser(description="For JUNO NMO analysis.")
+    parser.add_argument("--AtmOsci",
+                        action="store_true",
+                        help="Show atmospheric oscillation parttern")
+    parser.set_defaults(AtmOsci=False)
+    parser.add_argument("--Eup",
+                        type=float,
+                        default=1,
+                        help="The upper bound of the energy")
+    parser.add_argument("--ReaOsci",
+                        action="store_true",
+                        help="Show Reactor neutrino oscillation parttern")
+    parser.set_defaults(ReaOsci=False)
+
+    return parser
+
+
 def ShowAtmOsciPattern(Eup=1):
     my_flux = flux_Honda.flux_Honda()
 
@@ -128,11 +147,20 @@ def ShowAtmOsciPattern(Eup=1):
     fig.savefig('./pics/Nu2eAngle_%.1fGeV.png' % (eList[i_e]))
 
 
+def ShowReaOsciPattern():
+    pass
+
+
 if __name__ == "__main__":
     # reactor_average_energy()
     plt.style.use('lib/Paper.mplstyle')
     import sys
-    ShowAtmOsciPattern(float(sys.argv[1]))
+    parser = get_parser()
+    args = parser.parse_args()
+    if args.AtmOsci:
+        ShowAtmOsciPattern(args.Eup)
+    if args.ReaOsci:
+        ShowReaOsciPattern()
 
     # from physics.nu_oscillation.Prob_e2e import Prob_e2e
     # a= Prob_e2e()
