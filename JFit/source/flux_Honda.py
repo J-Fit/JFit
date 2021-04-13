@@ -69,23 +69,30 @@ def get_parser():
 
 def ShowJUNOFlux():
     my_juno_flux = flux_Honda()
-    Enu = np.linspace(1, 20)
+    Enu = np.linspace(1, 20,100)
 
-    # plt.plot(Enu, my_juno_flux.get_flavor_ratio(Enu=Enu, flavor_a=12, flavor_b=14))
-    plt.plot(Enu,
-             my_juno_flux.get_flux(Enu, flavor_ID=14),
-             label=r'$\nu_{\mu}$')
-    plt.plot(Enu,
-             my_juno_flux.get_flux(Enu, flavor_ID=-14),
-             label=r'$\bar{\nu}_{\mu}$')
-    plt.plot(Enu, my_juno_flux.get_flux(Enu, flavor_ID=12), label=r'$\nu_{e}$')
-    plt.plot(Enu,
-             my_juno_flux.get_flux(Enu, flavor_ID=-12),
-             label=r'$\bar{\nu}_{e}$')
-    plt.yscale('log')
-    # plt.xscale('log')
+    phi_mu = my_juno_flux.get_flux(Enu, flavor_ID=14)
+    phi_mu_bar = my_juno_flux.get_flux(Enu, flavor_ID=-14)
+    phi_e = my_juno_flux.get_flux(Enu, flavor_ID=12)
+    phi_e_bar = my_juno_flux.get_flux(Enu, flavor_ID=-12)
+    plt.plot(Enu, phi_mu / phi_mu_bar, label=r'$\nu_{\mu}$/$\bar{\nu}_{\mu}$')
+    plt.plot(Enu, phi_e / phi_e_bar, label=r'$\nu_{e}$/$\bar{\nu}_{e}$')
+    plt.plot(Enu, (phi_mu + phi_mu_bar) / (phi_e + phi_e_bar), label=r'($\nu_{\mu}$+$\bar{\nu}_{\mu}$)/($\nu_{e}$+$\bar{\nu}_{e}$)')
+    # plt.plot(Enu,
+    #          my_juno_flux.get_flux(Enu, flavor_ID=14),
+    #          label=r'$\nu_{\mu}$')
+    # plt.plot(Enu,
+    #          my_juno_flux.get_flux(Enu, flavor_ID=-14),
+    #          label=r'$\bar{\nu}_{\mu}$')
+    # plt.plot(Enu, my_juno_flux.get_flux(Enu, flavor_ID=12), label=r'$\nu_{e}$')
+    # plt.plot(Enu,
+    #          my_juno_flux.get_flux(Enu, flavor_ID=-12),
+    #          label=r'$\bar{\nu}_{e}$')
+    # plt.yscale('log')
+    plt.xscale('log')
     plt.xlabel('Neutrino Energy [GeV]')
     plt.ylabel(r'$(m^2\cdot sec\cdot sr\cdot GeV)^{-1}$')
+    plt.ylabel(r'Flavour ratio')
     plt.legend()
     plt.show()
 
@@ -93,7 +100,7 @@ def ShowJUNOFlux():
 def ShowJUNO_INOFLux():
     my_juno_flux = flux_Honda()
     my_ino_flux = flux_Honda(exp_site='ino')
-    Enu = np.linspace(1, 20,100)
+    Enu = np.linspace(1, 20, 100)
 
     # plt.plot(Enu, my_juno_flux.get_flavor_ratio(Enu=Enu, flavor_a=12, flavor_b=14))
     plt.plot(Enu,

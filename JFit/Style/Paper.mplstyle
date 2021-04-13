@@ -21,4 +21,5 @@ legend.fontsize      : 22
 legend.frameon       : True
 axes.formatter.limits: -3, 5
 font.size:    20
-figure.subplot.left:   0.18  # the left side of the subplots of the figure
+figure.subplot.left:   0.15  # the left side of the subplots of the figure
+figure.subplot.bottom: 0.15   # the bottom of the subplots of the figure
