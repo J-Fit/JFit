@@ -63,12 +63,20 @@ class flux_Honda:
                                                     y=cosz_y,
                                                     z=phi_z['NuEbar'])
 
-    def get_flux(self, Enu, flavor_ID=12):
+    def get_flux(self, Enu, cosz, flavor_ID=14):
+        import numpy as np
+        if flavor_ID in self.particle_list:
+            return self.f_flux_ecz[flavor_ID](Enu, cosz)
+        else:
+            print("WRONG PDGID! Need one of:",self.particle_list)
+            return np.zeros_like(Enu)
+
+    def get_flux_all_direct(self, Enu, flavor_ID=12):
         import numpy as np
         if flavor_ID in self.particle_list:
             return self.f_flux_all_direct[flavor_ID](Enu)
         else:
-            print("WRONG PDGID!")
+            print("WRONG PDGID! Need one of:",self.particle_list)
             return np.zeros_like(Enu)
 
     def get_flavor_ratio(self, Enu, flavor_a=12, flavor_b=14):
@@ -109,24 +117,24 @@ def ShowJUNOFlux():
     my_juno_flux = flux_Honda()
     Enu = np.linspace(1, 20, 100)
 
-    phi_mu = my_juno_flux.get_flux(Enu, flavor_ID=14)
-    phi_mu_bar = my_juno_flux.get_flux(Enu, flavor_ID=-14)
-    phi_e = my_juno_flux.get_flux(Enu, flavor_ID=12)
-    phi_e_bar = my_juno_flux.get_flux(Enu, flavor_ID=-12)
+    phi_mu = my_juno_flux.get_flux_all_direct(Enu, flavor_ID=14)
+    phi_mu_bar = my_juno_flux.get_flux_all_direct(Enu, flavor_ID=-14)
+    phi_e = my_juno_flux.get_flux_all_direct(Enu, flavor_ID=12)
+    phi_e_bar = my_juno_flux.get_flux_all_direct(Enu, flavor_ID=-12)
     plt.plot(Enu, phi_mu / phi_mu_bar, label=r'$\nu_{\mu}$/$\bar{\nu}_{\mu}$')
     plt.plot(Enu, phi_e / phi_e_bar, label=r'$\nu_{e}$/$\bar{\nu}_{e}$')
     plt.plot(
         Enu, (phi_mu + phi_mu_bar) / (phi_e + phi_e_bar),
         label=r'($\nu_{\mu}$+$\bar{\nu}_{\mu}$)/($\nu_{e}$+$\bar{\nu}_{e}$)')
     # plt.plot(Enu,
-    #          my_juno_flux.get_flux(Enu, flavor_ID=14),
+    #          my_juno_flux.get_flux_all_direct(Enu, flavor_ID=14),
     #          label=r'$\nu_{\mu}$')
     # plt.plot(Enu,
-    #          my_juno_flux.get_flux(Enu, flavor_ID=-14),
+    #          my_juno_flux.get_flux_all_direct(Enu, flavor_ID=-14),
     #          label=r'$\bar{\nu}_{\mu}$')
-    # plt.plot(Enu, my_juno_flux.get_flux(Enu, flavor_ID=12), label=r'$\nu_{e}$')
+    # plt.plot(Enu, my_juno_flux.get_flux_all_direct(Enu, flavor_ID=12), label=r'$\nu_{e}$')
     # plt.plot(Enu,
-    #          my_juno_flux.get_flux(Enu, flavor_ID=-12),
+    #          my_juno_flux.get_flux_all_direct(Enu, flavor_ID=-12),
     #          label=r'$\bar{\nu}_{e}$')
     # plt.yscale('log')
     plt.xscale('log')
@@ -144,20 +152,20 @@ def ShowJUNO_INOFLux():
 
     # plt.plot(Enu, my_juno_flux.get_flavor_ratio(Enu=Enu, flavor_a=12, flavor_b=14))
     plt.plot(Enu,
-             my_juno_flux.get_flux(Enu, flavor_ID=14) /
-             my_ino_flux.get_flux(Enu, flavor_ID=14),
+             my_juno_flux.get_flux_all_direct(Enu, flavor_ID=14) /
+             my_ino_flux.get_flux_all_direct(Enu, flavor_ID=14),
              label=r'$\nu_{\mu}$')
     plt.plot(Enu,
-             my_juno_flux.get_flux(Enu, flavor_ID=-14) /
-             my_ino_flux.get_flux(Enu, flavor_ID=-14),
+             my_juno_flux.get_flux_all_direct(Enu, flavor_ID=-14) /
+             my_ino_flux.get_flux_all_direct(Enu, flavor_ID=-14),
              label=r'$\bar{\nu}_{\mu}$')
     plt.plot(Enu,
-             my_juno_flux.get_flux(Enu, flavor_ID=12) /
-             my_ino_flux.get_flux(Enu, flavor_ID=12),
+             my_juno_flux.get_flux_all_direct(Enu, flavor_ID=12) /
+             my_ino_flux.get_flux_all_direct(Enu, flavor_ID=12),
              label=r'$\nu_{e}$')
     plt.plot(Enu,
-             my_juno_flux.get_flux(Enu, flavor_ID=-12) /
-             my_ino_flux.get_flux(Enu, flavor_ID=-12),
+             my_juno_flux.get_flux_all_direct(Enu, flavor_ID=-12) /
+             my_ino_flux.get_flux_all_direct(Enu, flavor_ID=-12),
              label=r'$\bar{\nu}_{e}$')
     # plt.yscale('log')
     # plt.xscale('log')
